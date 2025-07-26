@@ -1,3 +1,4 @@
+# ruff: noqa: F401, F403
 from .auth import *
 from .db import *
 from .environment import *

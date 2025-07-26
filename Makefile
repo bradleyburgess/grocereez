@@ -1,2 +1,5 @@
 format:
-	black src/
+	ruff format src/
+
+check:
+	ruff check src/
