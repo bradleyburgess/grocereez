@@ -3,3 +3,6 @@ format:
 
 check:
 	ruff check src/
+
+clean:
+	cleanpy
