@@ -6,3 +6,9 @@ check:
 
 clean:
 	cleanpy
+
+test:
+	.venv/bin/pytest
+
+migrate:
+	python manage.py migrate

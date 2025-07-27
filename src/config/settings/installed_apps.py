@@ -7,8 +7,14 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-PROJECT_APPS = [
-    "users",
+THIRDPARTY_APPS = [
+    "crispy_forms",
+    "crispy_bootstrap5",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS
+PROJECT_APPS = [
+    "users",
+    "dashboard",
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRDPARTY_APPS + PROJECT_APPS
