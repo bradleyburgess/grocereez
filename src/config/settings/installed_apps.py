@@ -14,6 +14,7 @@ THIRDPARTY_APPS = [
 
 PROJECT_APPS = [
     "users",
+    "dashboard",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRDPARTY_APPS + PROJECT_APPS

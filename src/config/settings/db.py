@@ -5,7 +5,7 @@ from .environment import BASE_DIR
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(BASE_DIR).resolve() / "db.sqlite3",
+        "NAME": Path(BASE_DIR).resolve().parent / "db.sqlite3",
     }
 }
 
