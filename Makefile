@@ -1,11 +1,14 @@
 format:
-	ruff format src/
+	.venv/bin/ruff format src/
 
 check:
-	ruff check src/
+	.venv/bin/ruff check src/
+
+fix:
+	.venv/bin/ruff check src/ --fix
 
 clean:
-	cleanpy
+	.venv/bin/cleanpy src/
 
 test:
 	.venv/bin/pytest

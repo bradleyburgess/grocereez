@@ -21,3 +21,9 @@ class DashboardTests(TestCase):
             "logout",
             response.content.decode("utf-8").lower(),
         )
+
+    def test_unauthenticated_redirected_to_login(self):
+        response = self.client.get(reverse("dashboard:index"))
+        self.assertEqual(302, response.status_code)
+        response = self.client.get(reverse("dashboard:index"), follow=True)
+        self.assertIn("login", response.redirect_chain[-1][0])

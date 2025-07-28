@@ -1,0 +1,10 @@
+{% extends 'layouts/app.html' %}
+{% block content %}
+  <h1>My Households</h1>
+  {% if not households %}
+    <p>You do not have any households yet.</p>
+    <p>
+      <a href="{% url 'households:create' %}" class="btn btn-link">Create a household</a>
+    </p>
+  {% endif %}
+{% endblock %}

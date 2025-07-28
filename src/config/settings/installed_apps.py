@@ -13,8 +13,10 @@ THIRDPARTY_APPS = [
 ]
 
 PROJECT_APPS = [
+    "base",
     "users",
     "dashboard",
+    "households",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRDPARTY_APPS + PROJECT_APPS
