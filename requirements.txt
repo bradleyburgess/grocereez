@@ -6,4 +6,5 @@ Faker==37.4.2
 pre_commit==4.2.0
 pytest==8.4.1
 pytest-django==4.11.1
+pytest-xdist==3.8.0
 ruff==0.12.5

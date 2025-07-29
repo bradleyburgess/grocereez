@@ -13,3 +13,16 @@ class Household(BaseModel):
         blank=True,
         null=True,
     )
+
+
+class HouseholdMember(models.Model):
+    class MemberType(models.TextChoices):
+        MEMBER = "M", "Member"
+        ADMIN = "A", "Admin"
+
+    household = models.ForeignKey(Household, on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    member_type = models.CharField(
+        max_length=1, choices=MemberType, default=MemberType.MEMBER
+    )
+    joined_at = models.DateTimeField(auto_now_add=True, editable=False)

@@ -6,5 +6,11 @@
     <p>
       <a href="{% url 'households:create' %}" class="btn btn-link">Create a household</a>
     </p>
+  {% else %}
+    <ul>
+      {% for household in households %}
+        <li>{{ household.name }}</li>
+      {% endfor %}
+    </ul>
   {% endif %}
 {% endblock %}

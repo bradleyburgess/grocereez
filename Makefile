@@ -11,7 +11,7 @@ clean:
 	.venv/bin/cleanpy src/
 
 test:
-	.venv/bin/pytest
+	.venv/bin/pytest -n auto
 
 migrate:
 	python manage.py migrate

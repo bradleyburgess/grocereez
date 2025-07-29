@@ -1,0 +1,10 @@
+{% extends 'layouts/app.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <h1>Create Household</h1>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <input type="submit" value="Add Household" class="btn btn-primary" />
+  </form>
+{% endblock %}
