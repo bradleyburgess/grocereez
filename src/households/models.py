@@ -32,3 +32,6 @@ class HouseholdMember(models.Model):
 
     def is_admin(self):
         return self.member_type == HouseholdMember.MemberType.ADMIN
+
+    class Meta:
+        unique_together = ("household", "user")

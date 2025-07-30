@@ -141,6 +141,18 @@ class TestHouseholdCreate:
         assertRedirects(response, reverse("households:index"))
         assertContains(response, household_name)
 
+    def test_cannot_create_household_with_same_name(
+        self, client: Client, user, household
+    ):
+        client.login(email=user["email"], password=user["password"])
+        client.get(reverse("dashboard:index"))
+        response = cast(
+            HttpResponse,
+            client.post(reverse("households:create"), data={"name": household["name"]}),
+        )
+        assert response.status_code == 200
+        assertContains(response, "Household with this name already exists")
+
 
 @pytest.mark.django_db
 class TestHouseholdDetail:
@@ -202,3 +214,33 @@ class TestDashboardHousehold:
         )
         response = cast(HttpResponse, client.get(reverse("households:view-current")))
         assertContains(response, household["household"].name)
+
+
+@pytest.mark.django_db
+class TestAddMember:
+    def test_fails_for_no_existing_user(self, client: Client, user, household):
+        household = household["household"]
+        client.login(email=user["email"], password=user["password"])
+        client.get(reverse("dashboard:index"))
+        response = cast(
+            HttpResponse,
+            client.post(
+                reverse("households:add-member"),
+                data={"email": "doesnotexist@user.com"},
+            ),
+        )
+        assertContains(response, "User does not exist")
+
+    def test_cannot_add_self(self, client: Client, user, household):
+        household = household["household"]
+        client.login(email=user["email"], password=user["password"])
+        client.get(reverse("dashboard:index"))
+        response = cast(
+            HttpResponse,
+            client.post(
+                reverse("households:add-member"),
+                data={"email": user["email"]},
+            ),
+        )
+        assert response.status_code == 200
+        assertContains(response, "User is already a household member")
