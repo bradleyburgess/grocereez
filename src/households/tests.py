@@ -3,6 +3,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
+from django.test import Client
 from django.urls import reverse
 from faker import Faker
 import pytest
@@ -20,18 +21,59 @@ def user(db):
     email = faker.email()
     password = faker.password()
     display_name = faker.name_nonbinary()
+    last_name = faker.last_name()
     return {
         "user": User.objects.create_user(
-            email=email, password=password, display_name=display_name
+            email=email,
+            password=password,
+            display_name=display_name,
+            last_name=last_name,
         ),  # type: ignore
         "email": email,
         "password": password,
+        "display_name": display_name,
+        "last_name": last_name,
+    }
+
+
+@pytest.fixture
+def new_user(db):
+    email = faker.email()
+    password = faker.password()
+    display_name = faker.name_nonbinary()
+    last_name = faker.last_name()
+    return {
+        "user": User.objects.create_user(
+            email=email,
+            password=password,
+            display_name=display_name,
+            last_name=last_name,
+        ),  # type: ignore
+        "email": email,
+        "password": password,
+        "display_name": display_name,
+        "last_name": last_name,
     }
 
 
 @pytest.fixture
 def household_name():
     return faker.last_name() + " Household"
+
+
+@pytest.fixture
+def household(db, user):
+    h_name = user["last_name"] + " Household"
+    household = Household.objects.create(name=h_name, created_by=user["user"])
+    HouseholdMember.objects.create(
+        user=user["user"],
+        household=household,
+        member_type=HouseholdMember.MemberType.ADMIN,
+    )
+    return {
+        "name": h_name,
+        "household": household,
+    }
 
 
 @pytest.mark.django_db
@@ -58,7 +100,7 @@ class TestHouseholdList:
         logged_in = client.login(email=user["email"], password=user["password"])
         assert logged_in
         response = client.get(reverse("households:index"))
-        assert "My Household" in response.content.decode("utf-8")
+        assert "Your Household" in response.content.decode("utf-8")
 
     def test_no_households_prompt_to_create(self, client, user):
         logged_in = client.login(email=user["email"], password=user["password"])
@@ -129,4 +171,26 @@ class TestHouseholdDetail:
             client.get(reverse("households:detail", kwargs={"uuid": h.uuid})),
         )
         assert response.status_code == 200
+        assertContains(response, household_name)
+
+
+@pytest.mark.django_db
+class TestDashboardHousehold:
+    def test_create_household_on_dashboard_for_no_household(
+        self, client: Client, new_user
+    ):
+        user = new_user
+        client.login(email=user["email"], password=user["password"])
+        response = cast(HttpResponse, client.get(reverse("dashboard:index")))
+        assert "add a household" in response.content.decode("utf-8").lower()
+
+    def test_household_shows_for_existing_household(
+        self, client: Client, user, household
+    ):
+        client.login(email=user["email"], password=user["password"])
+        response = cast(HttpResponse, client.get(reverse("dashboard:index")))
+        household_uuid = client.session.get("current_household_uuid")
+        print(client.session.keys())
+        household_name = Household.objects.get(uuid=household_uuid).name
+        assert "add a household" not in response.content.decode("utf-8").lower()
         assertContains(response, household_name)

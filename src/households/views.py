@@ -19,6 +19,10 @@ def index(request: HttpRequest) -> HttpResponse:
 @login_required
 def create(request: HttpRequest) -> HttpResponse:
     form = HouseholdCreateForm()
+    if request.method == "GET":
+        form = HouseholdCreateForm(
+            initial={"name": request.user.last_name + " Household"}  # type: ignore
+        )
     if request.method == "POST":
         form = HouseholdCreateForm(request.POST)
         if form.is_valid():
