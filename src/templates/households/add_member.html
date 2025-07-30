@@ -1,0 +1,22 @@
+{% extends 'layouts/app.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <div class="row mt-lg-5 justify-content-center">
+    <div class="col-12 col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="text-center">Add a Household Member</h1>
+        </div>
+        <form method="POST">
+          <div class="card-body">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-grid">
+              <input type="submit" value="Add User" class="btn btn-primary px-4" />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

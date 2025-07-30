@@ -28,7 +28,7 @@
             </ul>
             {% if user_is_admin %}
               <div class="card-body d-flex">
-                <a href="#" class="btn d-flex gap-2 align-items-center">
+                <a href="{% url 'households:add-member' %}" class="btn d-flex gap-2 align-items-center">
                   <i class="bi bi-plus-circle mb-0"></i>
                   <span>Add a new member</span>
                 </a>
