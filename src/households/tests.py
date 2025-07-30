@@ -108,7 +108,7 @@ class TestHouseholdList:
         response = (
             client.get(reverse("households:index")).content.decode("utf-8").lower()
         )
-        assert "create a household" in response
+        assert "add a household" in response
 
 
 @pytest.mark.django_db
@@ -189,8 +189,16 @@ class TestDashboardHousehold:
     ):
         client.login(email=user["email"], password=user["password"])
         response = cast(HttpResponse, client.get(reverse("dashboard:index")))
-        household_uuid = client.session.get("current_household_uuid")
-        print(client.session.keys())
-        household_name = Household.objects.get(uuid=household_uuid).name
+        household_name = household["household"].name
         assert "add a household" not in response.content.decode("utf-8").lower()
         assertContains(response, household_name)
+        assertContains(response, "Add a new member")
+
+    def test_view_current_household(self, client: Client, user, household):
+        client.login(email=user["email"], password=user["password"])
+        client.get(reverse("dashboard:index"))
+        client.session.update(
+            {"current_household_uuid": str(household["household"].uuid)}
+        )
+        response = cast(HttpResponse, client.get(reverse("households:view-current")))
+        assertContains(response, household["household"].name)

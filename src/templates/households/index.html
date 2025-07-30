@@ -1,16 +1,45 @@
 {% extends 'layouts/app.html' %}
 {% block content %}
-  <h1 class="text-center">Your Households</h1>
-  {% if not households %}
-    <p>You do not have any households yet.</p>
-    <p>
-      <a href="{% url 'households:create' %}" class="btn btn-link">Create a household</a>
-    </p>
-  {% else %}
-    <ul>
+  <div class="mt-lg-5">
+    <h1 class="text-center">Your Households</h1>
+    <div class="row mt-5 gx-5 justify-content-center">
       {% for household in households %}
-        <li>{{ household.name }}</li>
+        <div class="col-12 col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="h4">{{ household.name }}</h2>
+            </div>
+            <div class="card-body">
+              <p>{{ household.householdmember_set.count }} member{{ household.householdmember_set|pluralize }}:</p>
+              <ul>
+                {% for member in household.householdmember_set.all %}
+                  <li>
+                    {% if member.user == user %}
+                      You
+                    {% else %}
+                      {{ member.user.display_name }}
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div class="card-footer">
+              <a href="{% url 'households:detail' household.uuid %}" class="btn btn-secondary">View Household</a>
+            </div>
+          </div>
+        </div>
       {% endfor %}
-    </ul>
-  {% endif %}
+
+      <div class="col-12 col-lg-6">
+        <div class="card">
+          <div class="card-body d-flex justify-content-center">
+            <a href="{% url 'households:create' %}" class="d-flex justify-content-center align-items-center gap-3 btn">
+              <i class="bi bi-plus-circle h1 mb-0"></i>
+              <span class="h5">Add a household</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

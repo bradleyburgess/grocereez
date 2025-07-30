@@ -2,7 +2,7 @@ from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 
 from .forms import HouseholdCreateForm
@@ -41,8 +41,19 @@ def create(request: HttpRequest) -> HttpResponse:
 
 @login_required
 def detail(request: HttpRequest, uuid: UUID) -> HttpResponse:
+    households = Household.objects.filter(householdmember__user=request.user)
+    household = get_object_or_404(households, uuid=uuid)
+    members = HouseholdMember.objects.filter(household=household)
+    context = {"household": household, "members": members}
+    return render(request, "households/detail.html", context=context)
+
+
+@login_required
+def current_household_detail(request: HttpRequest) -> HttpResponse:
+    current_household_uuid = request.session.get("current_household_uuid")
     household = Household.objects.filter(householdmember__user=request.user).get(
-        uuid=uuid
+        uuid=current_household_uuid
     )
-    context = {"household": household}
+    members = HouseholdMember.objects.filter(household=household)
+    context = {"household": household, "members": members}
     return render(request, "households/detail.html", context=context)

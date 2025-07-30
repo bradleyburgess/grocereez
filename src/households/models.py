@@ -14,6 +14,9 @@ class Household(BaseModel):
         null=True,
     )
 
+    def user_is_admin(self, user):
+        return HouseholdMember.objects.filter(household=self, user=user).exists()
+
 
 class HouseholdMember(models.Model):
     class MemberType(models.TextChoices):
@@ -26,3 +29,6 @@ class HouseholdMember(models.Model):
         max_length=1, choices=MemberType, default=MemberType.MEMBER
     )
     joined_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def is_admin(self):
+        return self.member_type == HouseholdMember.MemberType.ADMIN
