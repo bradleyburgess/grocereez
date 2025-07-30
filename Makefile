@@ -1,14 +1,23 @@
+test:
+	.venv/bin/pytest -n auto
+
 format:
-	ruff format src/
+	.venv/bin/ruff format src/
 
 check:
-	ruff check src/
+	.venv/bin/ruff check src/
+
+fix:
+	.venv/bin/ruff check src/ --fix
 
 clean:
-	cleanpy
+	.venv/bin/cleanpy src/
 
-test:
-	.venv/bin/pytest
+run:
+	python manage.py runserver
 
 migrate:
 	python manage.py migrate
+
+migrations:
+	python manage.py makemigrations

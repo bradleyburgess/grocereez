@@ -1,45 +1,13 @@
 {% extends 'layouts/base.html' %}
+{% load url_helpers %}
 {% block body %}
-<header class="container-xxl">
-      <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="{% url 'home' %}">Grocereez</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            {% with url_name=request.resolver_match.url_name %}
-              <ul class="navbar-nav mb-2 mb-lg-0 flex-grow-1">
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                  <a class="nav-link {% if url_name == 'dashboard' %}active{% endif %}" {% if url_name == 'dashboard' %}aria-current="page"{% endif %} href="{% url 'dashboard:index' %}">Dashboard</a>
-                </li>
-                {% else %}
-                <li class="nav-item">
-                  <a class="nav-link {% if url_name == 'home' %}active{% endif %}" {% if url_name == 'home' %}aria-current="page"{% endif %} href="/">Home</a>
-                </li>
-                {% endif %}
-                {% if not user.is_authenticated %}
-                  <li class="nav-item ms-auto">
-                    <a href="{% url 'users:login' %}" {% if url_name == 'login' %}aria-current="page"{% endif %} class="nav-link {% if url_name == 'login' %}active{% endif %}">Login</a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="{% url 'users:signup' %}" {% if url_name == 'signup' %}aria-current="page"{% endif %} class="nav-link {% if url_name == 'signup' %}active{% endif %}">Signup</a>
-                  </li>
-                {% else %}
-                  <li class="nav-item ms-auto">
-                    <form action="{% url 'users:logout' %}" method="POST">
-                      {% csrf_token %}
-                      <input type="submit" class="btn btn-danger" value="Logout">
-                    </form>
-                  </li>
-                {% endif %}
-              </ul>
-            {% endwith %}
-          </div>
-        </div>
-      </nav>
-    </header>
-    <main class="container">
-      {% block content %}
-      {% endblock content %}
-    </main>
-{% endblock body %}
+  {% current_url_name as current_url_name %}
+  <header class="container-xxl">
+    {% include 'partials/navbar.html' %}
+  </header>
+  <main class="container pt-5">
+    {% block content %}
+
+    {% endblock %}
+  </main>
+{% endblock %}

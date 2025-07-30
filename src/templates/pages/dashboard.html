@@ -1,4 +1,71 @@
 {% extends 'layouts/app.html' %}
+{% load household_tags %}
+
 {% block content %}
-  <h1>Dashboard</h1>
+  {% user_is_household_admin household as user_is_admin %}
+  <h1 class="text-center">Dashboard</h1>
+  <div class="mt-5">
+    <div class="row g-5 justify-content-center">
+      {% comment %}Households{% endcomment %}
+      <div class="col-12 col-lg-5">
+        <div class="card">
+          <div class="card-header">
+            <h2>{{ household.name }}</h2>
+          </div>
+
+          {% if household %}
+            <ul class="list-group list-group-flush">
+              {% for member in members %}
+                <li class="d-flex flex-wrap gap-3 justify-content-between align-items-start align-items-lg-center list-group-item">
+                  <div class="d-grid d-lg-flex gap-lg-4">
+                    <span>{{ member.user.display_name }}</span> <a href="mailto:{{ member.user.email }}" class="text-decoration-none"><span class="small text-secondary">({{ member.user.email }})</span></a>
+                  </div>
+                  {% if member.is_admin %}
+                    <span class="badge bg-secondary">Admin</span>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+            {% if user_is_admin %}
+              <div class="card-body d-flex">
+                <a href="#" class="btn d-flex gap-2 align-items-center">
+                  <i class="bi bi-plus-circle mb-0"></i>
+                  <span>Add a new member</span>
+                </a>
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="card-body">
+              <p>You do not have any households yet.</p>
+              <p>
+                <a href="{% url 'households:create' %}" class="btn btn-primary">Add a household</a>
+              </p>
+            </div>
+          {% endif %}
+          <div class="card-footer">
+            <div class="d-flex gap-2">
+              <a href="{% url 'households:view-current' %}" class="btn btn-primary">View Household</a>
+              {% if user_is_admin %}
+                <a href="{% url 'households:index' %}" class="btn btn-secondary">Manage Households</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if household %}
+        {% comment %}Recipes{% endcomment %}
+        <div class="col-12 col-lg-5">
+          <div class="card">
+            <div class="card-header">
+              <h2>Recipes</h2>
+            </div>
+            <div class="card-body">
+              <p>You do not have any recipes yet.</p>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}

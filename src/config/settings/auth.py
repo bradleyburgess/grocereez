@@ -1,3 +1,5 @@
+from django.urls import reverse_lazy
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -14,3 +16,5 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "users.User"
+
+LOGIN_URL = reverse_lazy("users:login")
