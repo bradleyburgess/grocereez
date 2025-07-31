@@ -83,7 +83,7 @@ class TestHouseholdCreate:
         client.get(reverse("dashboard:index"))
         response = cast(
             HttpResponse,
-            client.post(reverse("households:create"), data={"name": household["name"]}),
+            client.post(reverse("households:create"), data={"name": household.name}),
         )
         assert response.status_code == 200
         assertContains(response, "Household with this name already exists")
@@ -136,7 +136,7 @@ class TestDashboardHousehold:
     ):
         client.login(email=user["email"], password=user["password"])
         response = cast(HttpResponse, client.get(reverse("dashboard:index")))
-        household_name = household["household"].name
+        household_name = household.name
         assert "add a household" not in response.content.decode("utf-8").lower()
         assertContains(response, household_name)
         assertContains(response, "Add a new member")
@@ -144,17 +144,14 @@ class TestDashboardHousehold:
     def test_view_current_household(self, client: Client, user, household):
         client.login(email=user["email"], password=user["password"])
         client.get(reverse("dashboard:index"))
-        client.session.update(
-            {"current_household_uuid": str(household["household"].uuid)}
-        )
+        client.session.update({"current_household_uuid": str(household.uuid)})
         response = cast(HttpResponse, client.get(reverse("households:view-current")))
-        assertContains(response, household["household"].name)
+        assertContains(response, household.name)
 
 
 @pytest.mark.django_db
 class TestAddMember:
     def test_fails_for_no_existing_user(self, client: Client, user, household):
-        household = household["household"]
         client.login(email=user["email"], password=user["password"])
         client.get(reverse("dashboard:index"))
         response = cast(
@@ -167,7 +164,6 @@ class TestAddMember:
         assertContains(response, "User does not exist")
 
     def test_cannot_add_self(self, client: Client, user, household):
-        household = household["household"]
         client.login(email=user["email"], password=user["password"])
         client.get(reverse("dashboard:index"))
         response = cast(

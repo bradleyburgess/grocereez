@@ -3,6 +3,7 @@ from faker import Faker
 import pytest
 
 from households.models import Household, HouseholdMember
+from ingredients.models import IngredientCategory
 
 faker = Faker()
 User = get_user_model()
@@ -76,7 +77,13 @@ def household(db, user):
         household=household,
         member_type=HouseholdMember.MemberType.ADMIN,
     )
-    return {
-        "name": h_name,
-        "household": household,
-    }
+    return household
+
+
+@pytest.fixture
+def ingredient_category(db, household, user):
+    return IngredientCategory.objects.create(
+        name="Dry Goods",
+        description="Pasta and stuff",
+        household=household,
+    )
