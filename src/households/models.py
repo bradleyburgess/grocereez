@@ -17,6 +17,9 @@ class Household(BaseModel):
     def user_is_admin(self, user):
         return HouseholdMember.objects.filter(household=self, user=user).exists()
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class HouseholdMember(models.Model):
     class MemberType(models.TextChoices):
@@ -32,6 +35,9 @@ class HouseholdMember(models.Model):
 
     def is_admin(self):
         return self.member_type == HouseholdMember.MemberType.ADMIN
+
+    def __str__(self) -> str:
+        return f"{self.user.__str__()} ({self.get_member_type_display()})"  # type: ignore
 
     class Meta:
         unique_together = ("household", "user")
