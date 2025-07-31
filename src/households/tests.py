@@ -1,13 +1,16 @@
 from typing import cast
 import uuid
+from unittest.mock import Mock
 
+from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpResponse
-from django.test import Client
+from django.test import Client, RequestFactory
 from django.urls import reverse
 import pytest
 from pytest_django.asserts import assertRedirects, assertContains
 
 from .forms import HouseholdCreateForm
+from .middleware import CurrentHouseholdMiddleware, HttpRequestWithHousehold
 from .models import Household, HouseholdMember
 
 
@@ -175,3 +178,35 @@ class TestAddMember:
         )
         assert response.status_code == 200
         assertContains(response, "User is already a household member")
+
+
+@pytest.mark.django_db
+class TestCurrentHouseholdMiddleware:
+    def test_middleware_adds_nothing_for_anon_user(
+        self, client: Client, user, household
+    ):
+        factory = RequestFactory()
+        request = cast(HttpRequestWithHousehold, factory.get(reverse("home")))
+        request.user = Mock()
+        request.user.is_authenticated = False
+        mock_get_response = Mock(return_value=Mock(status_code=200))
+        middleware = CurrentHouseholdMiddleware(mock_get_response)
+        response = middleware(request)
+        assert response.status_code == 200
+        assert not hasattr(request, "household")
+
+    def test_middleware_adds_household(self, client: Client, user, household):
+        factory = RequestFactory()
+        request = cast(
+            HttpRequestWithHousehold, factory.get(reverse("dashboard:index"))
+        )
+        request.user = user["user"]
+        request.session = SessionStore()
+        request.session.update({"current_household_uuid": str(household.uuid)})
+        # request.user.is_authenticated = True  # type: ignore
+        mock_get_response = Mock(return_value=Mock(status_code=200))
+        middleware = CurrentHouseholdMiddleware(mock_get_response)
+        response = middleware(request)
+        assert response.status_code == 200
+        assert hasattr(request, "household")
+        assert request.household == household
