@@ -1,79 +1,14 @@
 from typing import cast
 import uuid
 
-from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.test import Client
 from django.urls import reverse
-from faker import Faker
 import pytest
 from pytest_django.asserts import assertRedirects, assertContains
 
 from .forms import HouseholdCreateForm
 from .models import Household, HouseholdMember
-
-faker = Faker()
-User = get_user_model()
-
-
-@pytest.fixture
-def user(db):
-    email = faker.email()
-    password = faker.password()
-    display_name = faker.name_nonbinary()
-    last_name = faker.last_name()
-    return {
-        "user": User.objects.create_user(
-            email=email,
-            password=password,
-            display_name=display_name,
-            last_name=last_name,
-        ),  # type: ignore
-        "email": email,
-        "password": password,
-        "display_name": display_name,
-        "last_name": last_name,
-    }
-
-
-@pytest.fixture
-def new_user(db):
-    email = faker.email()
-    password = faker.password()
-    display_name = faker.name_nonbinary()
-    last_name = faker.last_name()
-    return {
-        "user": User.objects.create_user(
-            email=email,
-            password=password,
-            display_name=display_name,
-            last_name=last_name,
-        ),  # type: ignore
-        "email": email,
-        "password": password,
-        "display_name": display_name,
-        "last_name": last_name,
-    }
-
-
-@pytest.fixture
-def household_name():
-    return faker.last_name() + " Household"
-
-
-@pytest.fixture
-def household(db, user):
-    h_name = user["last_name"] + " Household"
-    household = Household.objects.create(name=h_name, created_by=user["user"])
-    HouseholdMember.objects.create(
-        user=user["user"],
-        household=household,
-        member_type=HouseholdMember.MemberType.ADMIN,
-    )
-    return {
-        "name": h_name,
-        "household": household,
-    }
 
 
 @pytest.mark.django_db
