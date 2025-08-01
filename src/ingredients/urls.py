@@ -4,7 +4,7 @@ from . import views
 
 app_name = "ingredients"
 
-urlpatterns = [
+ingredients_category_urls = [
     path(
         "categories/create",
         views.create_category,
@@ -26,3 +26,18 @@ urlpatterns = [
         name="categories-list",
     ),
 ]
+
+ingredient_urls = [
+    path(
+        "create",
+        views.create_ingredient,
+        name="create-ingredient",
+    ),
+    path(
+        "",
+        views.ingredients_list,
+        name="ingredients-list",
+    ),
+]
+
+urlpatterns = ingredients_category_urls + ingredient_urls

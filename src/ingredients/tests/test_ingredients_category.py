@@ -70,7 +70,11 @@ class TestIngredientCategoryCreate:
 @pytest.mark.django_db
 class TestIngredientsCategoryList:
     def test_ingredients_categories_list_has_items(
-        self, client: Client, user, household, ingredients_category
+        self,
+        client: Client,
+        user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
     ):
         client.login(email=user["email"], password=user["password"])
         response = cast(

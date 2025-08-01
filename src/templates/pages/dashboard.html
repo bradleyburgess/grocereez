@@ -44,7 +44,7 @@
           {% endif %}
           {% if household %}
             <div class="card-footer">
-              <div class="d-flex gap-2">
+              <div class="d-flex justify-content-between">
                 <a href="{% url 'households:view-current' %}" class="btn btn-primary">View Household</a>
                 <a href="{% url 'households:index' %}" class="btn btn-secondary">Manage Households</a>
               </div>
@@ -61,14 +61,13 @@
               <h2>Ingredients</h2>
             </div>
             <div class="card-body">
-              <h3 class="card-title">Ingredients Categories</h3>
               {% with ic=ingredients_categories ing=ingredients %}
                 <p>Your household has {{ ing }} ingredient{{ ing|pluralize }} in {{ ic }} categor{{ ic|pluralize:'y,ies' }}</p>
               {% endwith %}
             </div>
-            <div class="card-footer d-flex gap-2 justify-content-center">
+            <div class="card-footer d-flex justify-content-between">
               <a href="{% url 'ingredients:categories-list' %}" class="btn btn-secondary">Manage Categories</a>
-              <a href="#" class="btn btn-secondary">Manage Ingredients</a>
+              <a href="{% url 'ingredients:ingredients-list' %}" class="btn btn-secondary">Manage Ingredients</a>
             </div>
           </div>
         </div>

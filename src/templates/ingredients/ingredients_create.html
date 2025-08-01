@@ -1,0 +1,27 @@
+{% extends 'layouts/app.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="row mt-lg-5 justify-content-center">
+    <div class="col-12 col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="text-center">Add Ingredient</h1>
+        </div>
+        <div class="card-body">
+          {% if form %}
+            <form method="post">
+              {% csrf_token %}
+              {{ form|crispy }}
+              <div class="d-grid">
+                <input type="submit" value="Add" class="btn btn-primary" />
+              </div>
+            </form>
+          {% else %}
+            <p>You must add a household before you can add ingredients</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

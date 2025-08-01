@@ -6,8 +6,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 
 from households.middleware import HttpRequestWithHousehold
-from .forms import IngredientsCategoryForm, IngredientsCategoryDeleteForm
-from .models import IngredientsCategory
+
+from .forms import (
+    IngredientsCategoryForm,
+    IngredientsCategoryDeleteForm,
+    IngredientForm,
+)
+from .models import IngredientsCategory, Ingredient
 
 
 @login_required
@@ -76,3 +81,29 @@ def edit_category(request: HttpRequestWithHousehold, uuid: UUID) -> HttpResponse
             return redirect(reverse_lazy("ingredients:categories-list"))
     context = {"form": form, "category": ic}
     return render(request, "ingredients/categories_edit.html", context=context)
+
+
+@login_required
+def create_ingredient(request: HttpRequestWithHousehold) -> HttpResponse:
+    household = request.household
+    if not household:
+        return render(request, "ingredients/ingredients_create.html")
+    form = IngredientForm(household=household)
+    if request.method == "POST":
+        form = IngredientForm(household=household, data=request.POST)
+        if form.is_valid():
+            Ingredient.objects.create(
+                name=form.cleaned_data["name"],
+                category=form.cleaned_data["category"],
+                household=household,
+            )
+            return redirect(reverse_lazy("ingredients:ingredients-list"))
+    context = {"form": form}
+    return render(request, "ingredients/ingredients_create.html", context=context)
+
+
+@login_required
+def ingredients_list(request: HttpRequestWithHousehold) -> HttpResponse:
+    ingredients = Ingredient.objects.filter(household=request.household)
+    context = {"ingredients": ingredients}
+    return render(request, "ingredients/ingredients_list.html", context=context)
