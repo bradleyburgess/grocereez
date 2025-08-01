@@ -34,6 +34,16 @@ ingredient_urls = [
         name="create-ingredient",
     ),
     path(
+        "delete/<uuid:uuid>",
+        views.delete_ingredient,
+        name="delete-ingredient",
+    ),
+    path(
+        "edit/<uuid:uuid>",
+        views.edit_ingredient,
+        name="edit-ingredient",
+    ),
+    path(
         "",
         views.ingredients_list,
         name="ingredients-list",

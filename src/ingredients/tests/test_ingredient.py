@@ -1,7 +1,7 @@
 from typing import cast
 
 from django.db.utils import IntegrityError
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.test import Client
 from django.urls import reverse
 from faker import Faker
@@ -127,3 +127,165 @@ class TestIngredientList:
         )
         assert not response.context["ingredients"]
         assertContains(response, "no ingredients")
+
+
+@pytest.mark.django_db
+class TestIngredientDelete:
+    def test_can_delete_ingredients(
+        self,
+        client: Client,
+        user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        uuid = ingredient.uuid
+        response = cast(
+            HttpResponse,
+            client.post(
+                reverse(
+                    "ingredients:delete-ingredient",
+                    kwargs={"uuid": uuid},
+                )
+            ),
+        )
+        assertRedirects(response, reverse("ingredients:ingredients-list"))
+        with pytest.raises(Ingredient.DoesNotExist):
+            Ingredient.objects.get(uuid=uuid)
+
+    def test_delete_forbidden_not_household_user(
+        self,
+        client: Client,
+        user,
+        new_user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=new_user["email"], password=new_user["password"])
+        uuid = ingredient.uuid
+        response = cast(
+            HttpResponse,
+            client.post(
+                reverse(
+                    "ingredients:delete-ingredient",
+                    kwargs={"uuid": uuid},
+                )
+            ),
+        )
+        assert isinstance(response, HttpResponseForbidden)
+
+    def test_ingredient_delete_link_on_page(
+        self,
+        client: Client,
+        user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        response = cast(
+            HttpResponse, client.get(reverse("ingredients:ingredients-list"))
+        )
+        assertContains(
+            response,
+            reverse(
+                "ingredients:delete-ingredient",
+                kwargs={"uuid": ingredient.uuid},
+            ),
+        )
+
+
+@pytest.mark.django_db
+class TestIngredientEdit:
+    def test_ingredient_list_edit_link_on_page(
+        self,
+        client: Client,
+        user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        response = cast(
+            HttpResponse, client.get(reverse("ingredients:ingredients-list"))
+        )
+        assertContains(
+            response,
+            reverse(
+                "ingredients:edit-ingredient",
+                kwargs={"uuid": ingredient.uuid},
+            ),
+        )
+
+    def test_edit_forbidden_not_household_user(
+        self,
+        client: Client,
+        user,
+        new_user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=new_user["email"], password=new_user["password"])
+        uuid = ingredient.uuid
+        response = cast(
+            HttpResponse,
+            client.post(
+                reverse(
+                    "ingredients:edit-ingredient",
+                    kwargs={"uuid": uuid},
+                ),
+                data={"name": "This won't work", "category": ingredients_category.pk},
+            ),
+        )
+        assert isinstance(response, HttpResponseForbidden)
+
+    def test_edit_ingredient_renders_form(
+        self,
+        client: Client,
+        user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        response = cast(
+            HttpResponse,
+            client.get(
+                reverse(
+                    "ingredients:edit-ingredient",
+                    kwargs={"uuid": ingredient.uuid},
+                )
+            ),
+        )
+        assert isinstance(response.context["form"], IngredientForm)
+        assertContains(response, ingredient.name)
+
+    def test_edit_ingredient_saves_data(
+        self,
+        client: Client,
+        user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        new_name = " ".join(faker.words(2))
+        response = cast(
+            HttpResponse,
+            client.post(
+                reverse(
+                    "ingredients:edit-ingredient",
+                    kwargs={"uuid": ingredient.uuid},
+                ),
+                data={
+                    "name": new_name,
+                    "category": ingredients_category.pk,
+                },
+            ),
+        )
+        assertRedirects(response, reverse("ingredients:ingredients-list"))
+        ingredient = Ingredient.objects.get(uuid=ingredient.uuid)
+        assert ingredient.name == new_name

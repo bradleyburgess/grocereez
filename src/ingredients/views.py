@@ -104,6 +104,44 @@ def create_ingredient(request: HttpRequestWithHousehold) -> HttpResponse:
 
 @login_required
 def ingredients_list(request: HttpRequestWithHousehold) -> HttpResponse:
-    ingredients = Ingredient.objects.filter(household=request.household)
+    ingredients = Ingredient.objects.filter(household=request.household).order_by(
+        "name"
+    )
     context = {"ingredients": ingredients}
     return render(request, "ingredients/ingredients_list.html", context=context)
+
+
+@login_required
+def delete_ingredient(request: HttpRequestWithHousehold, uuid: UUID) -> HttpResponse:
+    ingredient = get_object_or_404(Ingredient, uuid=uuid)
+    if ingredient.household != request.household:
+        return HttpResponseForbidden(
+            "You do not have permission do delete this category"
+        )
+    if request.method == "POST":
+        ingredient.delete()
+        return redirect(reverse_lazy("ingredients:ingredients-list"))
+    context = {"ingredient": ingredient}
+    return render(request, "ingredients/ingredients_delete.html", context=context)
+
+
+@login_required
+def edit_ingredient(request: HttpRequestWithHousehold, uuid: UUID) -> HttpResponse:
+    ingredient = get_object_or_404(Ingredient, uuid=uuid)
+    household = request.household
+    if ingredient.household != household:
+        return HttpResponseForbidden(
+            "You do not have permission to edit this ingredient"
+        )
+    if not household:
+        return render(request, "ingredients/ingredients_edit.html")
+    form = IngredientForm(household=household, instance=ingredient)
+    if request.method == "POST":
+        form = IngredientForm(household=household, data=request.POST)
+        if form.is_valid():
+            ingredient.name = form.cleaned_data["name"]
+            ingredient.category = form.cleaned_data["category"]
+            ingredient.save()
+            return redirect(reverse_lazy("ingredients:ingredients-list"))
+    context = {"form": form, "ingredient": ingredient}
+    return render(request, "ingredients/ingredients_edit.html", context=context)

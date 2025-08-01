@@ -11,10 +11,12 @@
             {% for item in ingredients %}
               <li class="list-group-item">
                 <div class="d-flex justify-content-between">
-                  <div>{{ item }}</div>
+                  <div class="d-flex flex-wrap gap-2 align-items-baseline">
+                    <span>{{ item }}</span> <span class="small text-secondary">({{ item.category }})</span>
+                  </div>
                   <div class="d-flex gap-2">
-                    {% comment %} <a href="{% url 'ingredients:edit-category' ic.uuid %}"><i class="bi bi-pencil"></i><span class="visually-hidden">Edit {{ ic.name }}</span></a> {% endcomment %}
-                    {% comment %} <a href="{% url 'ingredients:delete-category' ic.uuid %}" class="text-danger"><i class="bi bi-trash"></i><span class="visually-hidden">Delete {{ ic.name }}</span></a> {% endcomment %}
+                    <a href="{% url 'ingredients:edit-ingredient' item.uuid %}"><i class="bi bi-pencil"></i><span class="visually-hidden">Edit {{ item }}</span></a>
+                    <a href="{% url 'ingredients:delete-ingredient' item.uuid %}" class="text-danger"><i class="bi bi-trash"></i><span class="visually-hidden">Delete {{ item }}</span></a>
                   </div>
                 </div>
               </li>
@@ -25,7 +27,7 @@
           <p>There are no ingredients for this household yet.</p>
         {% endif %}
         <div class="card-footer">
-          <a href="{% url 'ingredients:create-category' %}" class="btn d-flex gap-2 align-items-center">
+          <a href="{% url 'ingredients:create-ingredient' %}" class="btn d-flex gap-2 align-items-center">
             <i class="bi bi-plus-circle mb-0"></i>
             <span>Add an ingredient</span>
           </a>
