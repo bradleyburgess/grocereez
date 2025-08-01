@@ -10,5 +10,6 @@ urlpatterns = [
     path("registration/", include("users.urls", namespace="users")),
     path("dashboard/", include("dashboard.urls", namespace="dashboard")),
     path("households/", include("households.urls", namespace="households")),
+    path("ingredients/", include("ingredients.urls", namespace="ingredients")),
     path("", home_view, name="home"),
 ]

@@ -42,18 +42,35 @@
               </p>
             </div>
           {% endif %}
-          <div class="card-footer">
-            <div class="d-flex gap-2">
-              <a href="{% url 'households:view-current' %}" class="btn btn-primary">View Household</a>
-              {% if user_is_admin %}
+          {% if household %}
+            <div class="card-footer">
+              <div class="d-flex justify-content-between">
+                <a href="{% url 'households:view-current' %}" class="btn btn-primary">View Household</a>
                 <a href="{% url 'households:index' %}" class="btn btn-secondary">Manage Households</a>
-              {% endif %}
+              </div>
             </div>
-          </div>
+          {% endif %}
         </div>
       </div>
 
       {% if household %}
+        {% comment %}Ingredients{% endcomment %}
+        <div class="col-12 col-lg-5">
+          <div class="card">
+            <div class="card-header">
+              <h2>Ingredients</h2>
+            </div>
+            <div class="card-body">
+              {% with ic=ingredients_categories ing=ingredients %}
+                <p>Your household has {{ ing }} ingredient{{ ing|pluralize }} in {{ ic }} categor{{ ic|pluralize:'y,ies' }}</p>
+              {% endwith %}
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+              <a href="{% url 'ingredients:categories-list' %}" class="btn btn-secondary">Manage Categories</a>
+              <a href="{% url 'ingredients:ingredients-list' %}" class="btn btn-secondary">Manage Ingredients</a>
+            </div>
+          </div>
+        </div>
         {% comment %}Recipes{% endcomment %}
         <div class="col-12 col-lg-5">
           <div class="card">

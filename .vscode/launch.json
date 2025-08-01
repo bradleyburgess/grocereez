@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug with Pytest Django",
+      "type": "debugpy",
+      "request": "launch",
+      "args": [],
+      "django": true,
+      "autoStartBrowser": false,
+      "program": "${workspaceFolder}/.venv/bin/pytest",
+      "justMyCode": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "DJANGO_SETTINGS_MODULE": "config.settings"
+      }
+    },
+    {
+      "name": "Debug Django Runserver",
+      "type": "debugpy",
+      "request": "launch",
+      "args": ["runserver"],
+      "django": true,
+      "autoStartBrowser": false,
+      "program": "${workspaceFolder}/manage.py",
+      "justMyCode": true
+    }
+  ]
+}

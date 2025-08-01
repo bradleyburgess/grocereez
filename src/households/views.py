@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 
 from .forms import HouseholdCreateForm, AddHouseholdMemberForm
 from .models import Household, HouseholdMember
+from .middleware import HttpRequestWithHousehold
 
 User = get_user_model()
 
@@ -58,21 +59,17 @@ def detail(request: HttpRequest, uuid: UUID) -> HttpResponse:
 
 
 @login_required
-def current_household_detail(request: HttpRequest) -> HttpResponse:
-    current_household_uuid = request.session.get("current_household_uuid")
-    household = Household.objects.filter(householdmember__user=request.user).get(
-        uuid=current_household_uuid
-    )
+def current_household_detail(request: HttpRequestWithHousehold) -> HttpResponse:
+    household = request.household
     members = HouseholdMember.objects.filter(household=household)
     context = {"household": household, "members": members}
     return render(request, "households/detail.html", context=context)
 
 
 @login_required
-def add_member(request: HttpRequest) -> HttpResponse:
+def add_member(request: HttpRequestWithHousehold) -> HttpResponse:
     form = AddHouseholdMemberForm()
-    household_uuid = request.session.get("current_household_uuid")
-    household = Household.objects.get(uuid=household_uuid)
+    household = request.household
     if request.method == "POST":
         form = AddHouseholdMemberForm(request.POST)
         if form.is_valid():

@@ -1,79 +1,17 @@
 from typing import cast
 import uuid
+from unittest.mock import Mock
 
-from django.contrib.auth import get_user_model
+from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpResponse
-from django.test import Client
+from django.test import Client, RequestFactory
 from django.urls import reverse
-from faker import Faker
 import pytest
 from pytest_django.asserts import assertRedirects, assertContains
 
 from .forms import HouseholdCreateForm
+from .middleware import CurrentHouseholdMiddleware, HttpRequestWithHousehold
 from .models import Household, HouseholdMember
-
-faker = Faker()
-User = get_user_model()
-
-
-@pytest.fixture
-def user(db):
-    email = faker.email()
-    password = faker.password()
-    display_name = faker.name_nonbinary()
-    last_name = faker.last_name()
-    return {
-        "user": User.objects.create_user(
-            email=email,
-            password=password,
-            display_name=display_name,
-            last_name=last_name,
-        ),  # type: ignore
-        "email": email,
-        "password": password,
-        "display_name": display_name,
-        "last_name": last_name,
-    }
-
-
-@pytest.fixture
-def new_user(db):
-    email = faker.email()
-    password = faker.password()
-    display_name = faker.name_nonbinary()
-    last_name = faker.last_name()
-    return {
-        "user": User.objects.create_user(
-            email=email,
-            password=password,
-            display_name=display_name,
-            last_name=last_name,
-        ),  # type: ignore
-        "email": email,
-        "password": password,
-        "display_name": display_name,
-        "last_name": last_name,
-    }
-
-
-@pytest.fixture
-def household_name():
-    return faker.last_name() + " Household"
-
-
-@pytest.fixture
-def household(db, user):
-    h_name = user["last_name"] + " Household"
-    household = Household.objects.create(name=h_name, created_by=user["user"])
-    HouseholdMember.objects.create(
-        user=user["user"],
-        household=household,
-        member_type=HouseholdMember.MemberType.ADMIN,
-    )
-    return {
-        "name": h_name,
-        "household": household,
-    }
 
 
 @pytest.mark.django_db
@@ -141,6 +79,19 @@ class TestHouseholdCreate:
         assertRedirects(response, reverse("households:index"))
         assertContains(response, household_name)
 
+    def test_user_adds_household_and_is_admin(
+        self, client: Client, household_name, new_user
+    ):
+        user = new_user
+        client.login(email=user["email"], password=user["password"])
+        assert not Household.objects.filter(householdmember__user=user["user"]).exists()
+        client.post(reverse("households:create"), data={"name": household_name})
+        h = Household.objects.get(name=household_name)
+        assert (
+            HouseholdMember.objects.get(household=h).member_type
+            == HouseholdMember.MemberType.ADMIN
+        )
+
     def test_cannot_create_household_with_same_name(
         self, client: Client, user, household
     ):
@@ -148,7 +99,7 @@ class TestHouseholdCreate:
         client.get(reverse("dashboard:index"))
         response = cast(
             HttpResponse,
-            client.post(reverse("households:create"), data={"name": household["name"]}),
+            client.post(reverse("households:create"), data={"name": household.name}),
         )
         assert response.status_code == 200
         assertContains(response, "Household with this name already exists")
@@ -201,7 +152,7 @@ class TestDashboardHousehold:
     ):
         client.login(email=user["email"], password=user["password"])
         response = cast(HttpResponse, client.get(reverse("dashboard:index")))
-        household_name = household["household"].name
+        household_name = household.name
         assert "add a household" not in response.content.decode("utf-8").lower()
         assertContains(response, household_name)
         assertContains(response, "Add a new member")
@@ -209,17 +160,14 @@ class TestDashboardHousehold:
     def test_view_current_household(self, client: Client, user, household):
         client.login(email=user["email"], password=user["password"])
         client.get(reverse("dashboard:index"))
-        client.session.update(
-            {"current_household_uuid": str(household["household"].uuid)}
-        )
+        client.session.update({"current_household_uuid": str(household.uuid)})
         response = cast(HttpResponse, client.get(reverse("households:view-current")))
-        assertContains(response, household["household"].name)
+        assertContains(response, household.name)
 
 
 @pytest.mark.django_db
 class TestAddMember:
     def test_fails_for_no_existing_user(self, client: Client, user, household):
-        household = household["household"]
         client.login(email=user["email"], password=user["password"])
         client.get(reverse("dashboard:index"))
         response = cast(
@@ -232,7 +180,6 @@ class TestAddMember:
         assertContains(response, "User does not exist")
 
     def test_cannot_add_self(self, client: Client, user, household):
-        household = household["household"]
         client.login(email=user["email"], password=user["password"])
         client.get(reverse("dashboard:index"))
         response = cast(
@@ -244,3 +191,35 @@ class TestAddMember:
         )
         assert response.status_code == 200
         assertContains(response, "User is already a household member")
+
+
+@pytest.mark.django_db
+class TestCurrentHouseholdMiddleware:
+    def test_middleware_adds_nothing_for_anon_user(
+        self, client: Client, user, household
+    ):
+        factory = RequestFactory()
+        request = cast(HttpRequestWithHousehold, factory.get(reverse("home")))
+        request.user = Mock()
+        request.user.is_authenticated = False
+        mock_get_response = Mock(return_value=Mock(status_code=200))
+        middleware = CurrentHouseholdMiddleware(mock_get_response)
+        response = middleware(request)
+        assert response.status_code == 200
+        assert not hasattr(request, "household")
+
+    def test_middleware_adds_household(self, client: Client, user, household):
+        factory = RequestFactory()
+        request = cast(
+            HttpRequestWithHousehold, factory.get(reverse("dashboard:index"))
+        )
+        request.user = user["user"]
+        request.session = SessionStore()
+        request.session.update({"current_household_uuid": str(household.uuid)})
+        # request.user.is_authenticated = True  # type: ignore
+        mock_get_response = Mock(return_value=Mock(status_code=200))
+        middleware = CurrentHouseholdMiddleware(mock_get_response)
+        response = middleware(request)
+        assert response.status_code == 200
+        assert hasattr(request, "household")
+        assert request.household == household
