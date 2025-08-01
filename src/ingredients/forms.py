@@ -4,7 +4,7 @@ from django import forms
 from .models import IngredientsCategory
 
 
-class IngredientsCategoryCreateForm(forms.ModelForm):
+class IngredientsCategoryForm(forms.ModelForm):
     def clean(self) -> dict[str, Any]:
         cleaned_data = super().clean()
         cleaned_data["name"] = cleaned_data["name"].strip()

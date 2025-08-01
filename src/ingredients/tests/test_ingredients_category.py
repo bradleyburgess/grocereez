@@ -10,14 +10,14 @@ from pytest_django.asserts import assertContains, assertRedirects
 
 from households.models import Household
 
-from .forms import IngredientsCategoryCreateForm
-from .models import IngredientsCategory
+from ..forms import IngredientsCategoryForm
+from ..models import IngredientsCategory
 
 faker = Faker()
 
 
 @pytest.mark.django_db
-class TestIngredientCategory:
+class TestIngredientCategoryCreate:
     def test_cannot_create_duplicate_category(
         self, ingredients_category: IngredientsCategory
     ):
@@ -34,7 +34,7 @@ class TestIngredientCategory:
         response = cast(
             HttpResponse, client.get(reverse("ingredients:create-category"))
         )
-        assert isinstance(response.context["form"], IngredientsCategoryCreateForm)
+        assert isinstance(response.context["form"], IngredientsCategoryForm)
 
     def test_can_add_category(self, client: Client, user, household: Household):
         ic_name = "Fresh Producez"
@@ -66,6 +66,9 @@ class TestIngredientCategory:
             "household" in item for item in response.context["form"].errors["__all__"]
         )
 
+
+@pytest.mark.django_db
+class TestIngredientsCategoryList:
     def test_ingredients_categories_list_has_items(
         self, client: Client, user, household, ingredients_category
     ):
@@ -85,6 +88,9 @@ class TestIngredientCategory:
         assert not response.context["ingredients_categories"]
         assertContains(response, "no ingredients categories")
 
+
+@pytest.mark.django_db
+class TestIngredientsCategoryDelete:
     def test_can_delete_ingredients_category(
         self,
         client: Client,
@@ -147,7 +153,10 @@ class TestIngredientCategory:
             ),
         )
 
-    def test_ingredients_category_edit_link_on_page(
+
+@pytest.mark.django_db
+class TestIngredientsCategoryEdit:
+    def test_ingredients_category_list_edit_link_on_page(
         self,
         client: Client,
         user,
@@ -166,6 +175,28 @@ class TestIngredientCategory:
             ),
         )
 
+    def test_edit_forbidden_not_household_user(
+        self,
+        client: Client,
+        user,
+        new_user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+    ):
+        client.login(email=new_user["email"], password=new_user["password"])
+        uuid = ingredients_category.uuid
+        response = cast(
+            HttpResponse,
+            client.post(
+                reverse(
+                    "ingredients:edit-category",
+                    kwargs={"uuid": uuid},
+                ),
+                data={"name": "This won't work", "description": "Neither will this."},
+            ),
+        )
+        assert isinstance(response, HttpResponseForbidden)
+
     def test_edit_category_renders_form(
         self,
         client: Client,
@@ -183,7 +214,7 @@ class TestIngredientCategory:
                 )
             ),
         )
-        assert isinstance(response.context["form"], IngredientsCategoryCreateForm)
+        assert isinstance(response.context["form"], IngredientsCategoryForm)
         assertContains(response, ingredients_category.name)
 
     def test_edit_category_saves_data(

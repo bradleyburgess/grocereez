@@ -6,15 +6,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 
 from households.middleware import HttpRequestWithHousehold
-from .forms import IngredientsCategoryCreateForm, IngredientsCategoryDeleteForm
+from .forms import IngredientsCategoryForm, IngredientsCategoryDeleteForm
 from .models import IngredientsCategory
 
 
 @login_required
 def create_category(request: HttpRequestWithHousehold) -> HttpResponse:
-    form = IngredientsCategoryCreateForm()
+    form = IngredientsCategoryForm()
     if request.method == "POST":
-        form = IngredientsCategoryCreateForm(request.POST)
+        form = IngredientsCategoryForm(request.POST)
         if form.is_valid():
             household = request.household
             if not household:
@@ -62,13 +62,13 @@ def delete_category(request: HttpRequestWithHousehold, uuid: UUID) -> HttpRespon
 @login_required
 def edit_category(request: HttpRequestWithHousehold, uuid: UUID) -> HttpResponse:
     ic = get_object_or_404(IngredientsCategory, uuid=uuid)
-    form = IngredientsCategoryCreateForm(instance=ic)
+    form = IngredientsCategoryForm(instance=ic)
     if request.method == "POST":
         if ic.household != request.household:
             return HttpResponseForbidden(
                 "You do not have permission to edit this category"
             )
-        form = IngredientsCategoryCreateForm(request.POST)
+        form = IngredientsCategoryForm(request.POST)
         if form.is_valid():
             ic.name = form.cleaned_data["name"]
             ic.description = form.cleaned_data["description"]

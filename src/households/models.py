@@ -41,3 +41,5 @@ class HouseholdMember(models.Model):
 
     class Meta:
         unique_together = ("household", "user")
+        verbose_name = "Household Memnber"
+        verbose_name_plural = "Household Members"
