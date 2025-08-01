@@ -3,7 +3,7 @@ from faker import Faker
 import pytest
 
 from households.models import Household, HouseholdMember
-from ingredients.models import IngredientCategory
+from ingredients.models import IngredientsCategory
 
 faker = Faker()
 User = get_user_model()
@@ -37,6 +37,7 @@ def new_user(db):
     email = faker.email()
     password = faker.password()
     display_name = faker.name_nonbinary()
+    first_name = faker.first_name()
     last_name = faker.last_name()
     return {
         "user": User.objects.create_user(
@@ -48,6 +49,7 @@ def new_user(db):
         "email": email,
         "password": password,
         "display_name": display_name,
+        "first_name": first_name,
         "last_name": last_name,
     }
 
@@ -81,8 +83,8 @@ def household(db, user):
 
 
 @pytest.fixture
-def ingredient_category(db, household, user):
-    return IngredientCategory.objects.create(
+def ingredients_category(db, household, user):
+    return IngredientsCategory.objects.create(
         name="Dry Goods",
         description="Pasta and stuff",
         household=household,

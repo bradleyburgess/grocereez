@@ -17,6 +17,7 @@ PROJECT_APPS = [
     "users",
     "dashboard",
     "households",
+    "ingredients",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRDPARTY_APPS + PROJECT_APPS

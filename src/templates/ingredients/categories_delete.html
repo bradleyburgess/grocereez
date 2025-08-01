@@ -1,0 +1,33 @@
+{% extends 'layouts/app.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <div class="row mt-lg-5 justify-content-center">
+    <div class="col-12 col-lg-4">
+      <div class="card">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="card-header">
+            <h1 class="text-center">Are you sure?</h1>
+          </div>
+          <div class="card-body">
+            <p>
+              You are about to delete the category <strong>{{ category }}</strong>.
+            </p>
+            <p>You can preserve the ingredients associated with this category and mark them as uncategorized, or you can delete the ingredients as well.</p>
+            <p>{{ form|crispy }}</p>
+          </div>
+          <div class="card-footer">
+            <div class="d-flex justify-content-between">
+              <div>
+                <a href="{% url 'ingredients:categories-list' %}" class="btn btn-secondary">Go back</a>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger"><span>Yes, delete</span></button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

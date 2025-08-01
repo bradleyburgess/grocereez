@@ -30,3 +30,8 @@ class TestDashboard:
             HttpResponse, client.get(reverse("dashboard:index"), follow=True)
         )
         assert "login" in response.redirect_chain[-1][0]
+
+    def test_new_user_does_not_have_view_household(self, client: Client, new_user):
+        client.login(email=new_user["email"], password=new_user["password"])
+        response = cast(HttpResponse, client.get(reverse("dashboard:index")))
+        assertNotContains(response, "View Household")

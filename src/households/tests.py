@@ -79,6 +79,19 @@ class TestHouseholdCreate:
         assertRedirects(response, reverse("households:index"))
         assertContains(response, household_name)
 
+    def test_user_adds_household_and_is_admin(
+        self, client: Client, household_name, new_user
+    ):
+        user = new_user
+        client.login(email=user["email"], password=user["password"])
+        assert not Household.objects.filter(householdmember__user=user["user"]).exists()
+        client.post(reverse("households:create"), data={"name": household_name})
+        h = Household.objects.get(name=household_name)
+        assert (
+            HouseholdMember.objects.get(household=h).member_type
+            == HouseholdMember.MemberType.ADMIN
+        )
+
     def test_cannot_create_household_with_same_name(
         self, client: Client, user, household
     ):

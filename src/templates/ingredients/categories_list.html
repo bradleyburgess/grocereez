@@ -1,0 +1,36 @@
+{% extends 'layouts/app.html' %}
+{% block content %}
+  <div class="row mt-lg-5 justify-content-center">
+    <div class="col-12 col-lg-5">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="text-center">Ingredients Categories</h1>
+        </div>
+        {% if ingredients_categories %}
+          <ul class="list-group list-group-flush">
+            {% for ic in ingredients_categories %}
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <div>{{ ic }}</div>
+                  <div class="d-flex gap-2">
+                    <a href="{% url 'ingredients:edit-category' ic.uuid %}"><i class="bi bi-pencil"></i><span class="visually-hidden">Edit {{ ic.name }}</span></a>
+                    <a href="{% url 'ingredients:delete-category' ic.uuid %}" class="text-danger"><i class="bi bi-trash"></i><span class="visually-hidden">Delete {{ ic.name }}</span></a>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="card-body"></div>
+          <p>There are no ingredients categories for this household yet.</p>
+        {% endif %}
+        <div class="card-footer">
+          <a href="{% url 'ingredients:create-category' %}" class="btn d-flex gap-2 align-items-center">
+            <i class="bi bi-plus-circle mb-0"></i>
+            <span>Add an ingredients category</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

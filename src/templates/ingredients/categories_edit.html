@@ -1,0 +1,24 @@
+{% extends 'layouts/app.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="row mt-lg-5 justify-content-center">
+    <div class="col-12 col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="text-center">Edit Category</h1>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{% url 'ingredients:edit-category' category.uuid %}">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-flex gap-5 justify-content-center">
+              <a href="{% url 'ingredients:categories-list' %}" class="btn btn-secondary flex-grow-1">Go back</a>
+              <button type="submit" class="btn btn-primary flex-grow-1">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

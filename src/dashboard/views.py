@@ -6,12 +6,23 @@ from django.shortcuts import render, redirect
 from households.models import HouseholdMember
 from households.middleware import HttpRequestWithHousehold
 
+from ingredients.models import IngredientsCategory
+
 
 @login_required
 def dashboard_view(request: HttpRequestWithHousehold) -> HttpResponse:
     household = request.household
     members = HouseholdMember.objects.filter(household=household)
-    context = {"household": household, "members": members}
+    ingredients_categories = IngredientsCategory.objects.filter(
+        household=household
+    ).count()
+    ingredients = 0
+    context = {
+        "household": household,
+        "members": members,
+        "ingredients_categories": ingredients_categories,
+        "ingredients": ingredients,
+    }
     return render(request, "pages/dashboard.html", context=context)
 
 
