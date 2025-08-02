@@ -18,6 +18,7 @@ PROJECT_APPS = [
     "dashboard",
     "households",
     "ingredients",
+    "recipes",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRDPARTY_APPS + PROJECT_APPS

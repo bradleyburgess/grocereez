@@ -4,6 +4,7 @@ import pytest
 
 from households.models import Household, HouseholdMember
 from ingredients.models import IngredientsCategory, Ingredient
+from recipes.models import Recipe
 
 faker = Faker()
 User = get_user_model()
@@ -98,3 +99,28 @@ def ingredient(db, household, ingredients_category, user):
         household=household,
         category=ingredients_category,
     )
+
+
+@pytest.fixture
+def ingredients_list(db, household, ingredients_category):
+    ingredients = list()
+    for _ in range(3):
+        name = " ".join(faker.words(2))
+        ingredients.append(
+            Ingredient.objects.create(
+                name=name, household=household, category=ingredients_category
+            )
+        )
+    return ingredients
+
+
+@pytest.fixture
+def recipe(db, user, household, ingredient):
+    r = Recipe.objects.create(
+        name=" ".join(faker.words(2)),
+        body="\n\n".join(faker.paragraphs(3)),
+        household=household,
+    )
+    r.ingredients.set([ingredient])
+    r.save()
+    return r
