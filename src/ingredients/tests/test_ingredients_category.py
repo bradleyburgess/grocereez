@@ -11,7 +11,7 @@ from pytest_django.asserts import assertContains, assertRedirects
 from households.models import Household
 
 from ..forms import IngredientsCategoryForm
-from ..models import IngredientsCategory
+from ..models import IngredientsCategory, Ingredient
 
 faker = Faker()
 
@@ -156,6 +156,52 @@ class TestIngredientsCategoryDelete:
                 kwargs={"uuid": ingredients_category.uuid},
             ),
         )
+
+    def test_delete_category_without_delete_ingredients_does_not_delete_ingredients(
+        self,
+        user,
+        client: Client,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        assert IngredientsCategory.objects.exists()
+        assert Ingredient.objects.exists()
+        client.post(
+            reverse(
+                "ingredients:delete-category",
+                kwargs={
+                    "uuid": ingredients_category.uuid,
+                },
+            ),
+            data={"delete_ingredients": False},
+        )
+        assert not IngredientsCategory.objects.exists()
+        assert Ingredient.objects.exists()
+
+    def test_delete_category_with_delete_ingredients_deletes_ingredients(
+        self,
+        user,
+        client: Client,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        assert IngredientsCategory.objects.exists()
+        assert Ingredient.objects.exists()
+        client.post(
+            reverse(
+                "ingredients:delete-category",
+                kwargs={
+                    "uuid": ingredients_category.uuid,
+                },
+            ),
+            data={"delete_ingredients": True},
+        )
+        assert not IngredientsCategory.objects.exists()
+        assert not Ingredient.objects.exists()
 
 
 @pytest.mark.django_db

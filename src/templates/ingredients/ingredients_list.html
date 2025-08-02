@@ -12,7 +12,7 @@
               <li class="list-group-item">
                 <div class="d-flex justify-content-between">
                   <div class="d-flex flex-wrap gap-2 align-items-baseline">
-                    <span>{{ item }}</span> <span class="small text-secondary">({{ item.category }})</span>
+                    <span>{{ item }}</span> <span class="small text-secondary">({{ item.category|default_if_none:'Uncategorized' }})</span>
                   </div>
                   <div class="d-flex gap-2">
                     <a href="{% url 'ingredients:edit-ingredient' item.uuid %}"><i class="bi bi-pencil"></i><span class="visually-hidden">Edit {{ item }}</span></a>
