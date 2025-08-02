@@ -27,6 +27,12 @@ class IngredientsCategory(BaseModel):
         default=False,
     )
 
+    def clean(self) -> None:
+        super().clean()
+        self.name = self.name.strip()
+        if self.description:
+            self.description = self.description.strip()
+
     def __str__(self) -> str:
         return self.name
 
@@ -58,6 +64,10 @@ class Ingredient(BaseModel):
         verbose_name="System Value",
         default=False,
     )
+
+    def clean(self) -> None:
+        super().clean()
+        self.name = self.name.strip()
 
     def __str__(self) -> str:
         return self.name

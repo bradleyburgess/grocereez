@@ -128,6 +128,20 @@ class TestIngredientList:
         assert not response.context["ingredients"]
         assertContains(response, "no ingredients")
 
+    def test_ingredients_category_uncategorized(
+        self,
+        client: Client,
+        user,
+        household: Household,
+        ingredients_category: IngredientsCategory,
+        ingredient: Ingredient,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        ingredient.category = None
+        ingredient.save()
+        response = client.get(reverse("ingredients:ingredients-list"))
+        assertContains(response, "Uncategorized")
+
 
 @pytest.mark.django_db
 class TestIngredientDelete:

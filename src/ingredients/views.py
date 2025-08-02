@@ -58,6 +58,10 @@ def delete_category(request: HttpRequestWithHousehold, uuid: UUID) -> HttpRespon
     if request.method == "POST":
         form = IngredientsCategoryDeleteForm(request.POST)
         if form.is_valid():
+            if form.cleaned_data["delete_ingredients"]:
+                Ingredient.objects.filter(
+                    household=request.household, category=ic
+                ).delete()
             ic.delete()
             return redirect(reverse_lazy("ingredients:categories-list"))
     context = {"form": form, "category": ic.name}
