@@ -1,8 +1,12 @@
-from typing import List
+from typing import cast, List
 
 from django.db.utils import IntegrityError
+from django.http import HttpResponse
+from django.test import Client
+from django.urls import reverse
 from faker import Faker
 import pytest
+from pytest_django.asserts import assertContains
 
 from .models import Recipe
 from households.models import Household
@@ -47,3 +51,43 @@ class TestRecipesModel:
         r.ingredients.set(ingredients_list)
         r.save()
         assert r.ingredients.count() == len(ingredients_list)
+
+
+@pytest.mark.django_db
+class TestRecipeDashboard:
+    def test_recipes_show_on_dashboard(
+        self,
+        user,
+        client: Client,
+        ingredients_list: List[Ingredient],
+        recipe: Recipe,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        response = cast(HttpResponse, client.get(reverse("dashboard:index")))
+        assertContains(response, "1 recipe")
+        assertContains(response, recipe.name)
+
+    def test_dashboard_has_recipts_list_link(
+        self,
+        client: Client,
+        user,
+        recipe: Recipe,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        response = cast(HttpResponse, client.get(reverse("dashboard:index")))
+        assertContains(response, f'href="{reverse("recipes:list")}"')
+
+
+@pytest.mark.django_db
+class TestRecipeList:
+    def test_recipes_list_renders_list(
+        self,
+        client: Client,
+        user,
+        household: Household,
+        recipe: Recipe,
+    ):
+        client.login(email=user["email"], password=user["password"])
+        response = cast(HttpResponse, client.get(reverse("recipes:list")))
+        assert response.status_code == 200
+        assertContains(response, recipe.name)

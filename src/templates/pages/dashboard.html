@@ -54,6 +54,34 @@
       </div>
 
       {% if household %}
+        {% comment %}Recipes{% endcomment %}
+        <div class="col-12 col-lg-5">
+          <div class="card">
+            <div class="card-header">
+              <h2>Recipes</h2>
+            </div>
+            <div class="card-body">
+              {% if household.recipes %}
+                {% with recipes=household.recipes.all %}
+                  <p>Your household has {{ recipes.count }} recipe{{ recipes|pluralize }}.</p>
+                {% endwith %}
+                <ul>
+                  {% for recipe in household.recipes.all|slice:'5' %}
+                    <li>{{ recipe.name }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p>Your household does not have any recipes yet.</p>
+              {% endif %}
+            </div>
+            <div class="card-footer">
+              <div class="card-footer d-flex justify-content-between">
+                <a href="{% url 'recipes:list' %}" class="btn btn-secondary">Manage Recipes</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {% comment %}Ingredients{% endcomment %}
         <div class="col-12 col-lg-5">
           <div class="card">
@@ -68,17 +96,6 @@
             <div class="card-footer d-flex justify-content-between">
               <a href="{% url 'ingredients:categories-list' %}" class="btn btn-secondary">Manage Categories</a>
               <a href="{% url 'ingredients:ingredients-list' %}" class="btn btn-secondary">Manage Ingredients</a>
-            </div>
-          </div>
-        </div>
-        {% comment %}Recipes{% endcomment %}
-        <div class="col-12 col-lg-5">
-          <div class="card">
-            <div class="card-header">
-              <h2>Recipes</h2>
-            </div>
-            <div class="card-body">
-              <p>You do not have any recipes yet.</p>
             </div>
           </div>
         </div>
