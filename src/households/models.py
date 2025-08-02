@@ -17,6 +17,10 @@ class Household(BaseModel):
     def user_is_admin(self, user):
         return HouseholdMember.objects.filter(household=self, user=user).exists()
 
+    def clean(self) -> None:
+        super().clean()
+        self.name = self.name.strip()
+
     def __str__(self) -> str:
         return self.name
 
